@@ -7,8 +7,8 @@ CREATE TABLE Customers (
    BirthDate            DATE	             NULL,
    Email                VARCHAR(150)         NOT NULL UNIQUE,
    DateJoined           DATETIME             NOT NULL,
-   CreatedAt			DATETIME			 DEFAULT GETDATE(),
-   IsEnable				BIT					 NOT NULL DEFAULT 1
+   CreatedAt		DATETIME	     DEFAULT GETDATE(),
+   IsEnable		BIT	             NOT NULL DEFAULT 1
    )
 
    
@@ -18,7 +18,7 @@ CREATE TABLE Products (
    Category             VARCHAR(150)         NOT NULL,
    Price                DECIMAL(10,2)        NOT NULL,
    StockQuantity        INT                  NOT NULL CHECK (StockQuantity >= 0),
-   [Status]				BIT					 NOT NULL DEFAULT 1
+   [Status]		BIT       	     NOT NULL DEFAULT 1
 )
 
 CREATE TABLE Orders (
@@ -63,7 +63,7 @@ CREATE TABLE Reviews (
 
 
 
---INSERT sample data into each table to allow for meaningful Queries.
+--BULK INSERT sample data into each table to allow for meaningful Queries.
 
 --BUlK INSERT Customers
 --FROM 'C:\Users\Asus\DeskTOP\Customers.csv'
@@ -163,7 +163,7 @@ DELETE FROM Customers
 
 UPDATE Customers 
 	SET IsEnable=0
-	WHERE CustomerID=1
+	WHERE CustomerID=5
 
 --Part 3: Complex Queries
 
@@ -176,7 +176,7 @@ SELECT o.OrderID,c.*,p.*
 FROM Orders o
 JOIN Customers c	ON o.CustomerID=c.CustomerID
 JOIN Reviews r		ON r.CustomerID=c.CustomerID
-JOIN Products p	    ON p.ProductID=r.ProductID
+JOIN Products p	    	ON p.ProductID=r.ProductID
 
 --3.1.2 Show Customers who haven't placed any orders.
 
@@ -249,14 +249,14 @@ WHERE Quantity>2
 
 --3.3.2.3 QUANTITY
 
-WITH quantity AS (
+WITH Quantity AS (
 	SELECT o.CustomerID FROM orders o
 	JOIN Orderdetails od ON o.OrderID=od.OrderID
 	WHERE Quantity>2
 	)
 SELECT DISTINCT * 
 FROM Customers c 
-JOIN quantity q
+JOIN Quantity q
 ON c.CustomerID=q.CustomerID
 
 --3.3.3 List the TOP 5 most reviewed products.
@@ -317,7 +317,7 @@ Select CONCAT(FirstName,' ',LAStName) [Full Name]
 FROM Customers
 
 
-SELECT FirstName + ' ' + LAStName AS [Full Name] 
+SELECT FirstName + ' ' + LastName AS [Full Name] 
 FROM Customers
 
 --4.1.2 Extract YEAR and month FROM order dates.
@@ -383,15 +383,10 @@ ROLLBACK
 COMMIT
 
 
-
-
-
-
-
 --4.2.2 Extract Different Email Parts
 
 SELECT Email,SUBSTRING(Email,1,CHARINDEX('@',Email)-1) EmailName,
-			 SUBSTRING(Email,CHARINDEX('@',Email)+1,LEN(Email)) Domain
+	     SUBSTRING(Email,CHARINDEX('@',Email)+1,LEN(Email)) Domain
 FROM Customers
 
 
@@ -435,13 +430,14 @@ WHERE Email IS NOT NULL
 
 --4.2.2.2 Use regex to validate email formats. SIMPLE
 
-SELECT * FROM(
-			SELECT Email,
-			CASE 
-				WHEN Email like '%_@_%.__%' THEN 'Valid'
-				ELSE 'Invalid' 
-			END Validate_Email
-			FROM Customers)A
+SELECT * 
+FROM(
+	SELECT Email,
+		CASE 
+			WHEN Email like '%_@_%.__%' THEN 'Valid'
+			ELSE 'Invalid' 
+		END Validate_Email
+	FROM Customers)A
 WHERE Validate_Email='Invalid'
 
 
@@ -471,7 +467,7 @@ CREATE NONCLUSTERED INDEX IX_tblProducts_Status ON Products([Status])
 
 --4.3.2 Optimize subquery performance 
 
---Instead of this…
+--Instead of thisÂ…
 
 SELECT c.* 
 FROM Customers c
@@ -485,7 +481,7 @@ FROM Customers c WHERE CustomerID NOT IN (
 SELECT CustomerID FROM Orders o
 )
 
---Do this… 
+--Do thisÂ… 
 
 SELECT c.* 
 FROM Customers c
@@ -625,11 +621,11 @@ BEGIN
         JOIN @OrderDetails od ON p.ProductID = od.ProductID;
 
         -- Commit the transaction
-        COMMIT TRANSACTION;
+        COMMIT;
     END TRY
     BEGIN CATCH
         -- Rollback the transaction if an error occurs
-        ROLLBACK TRANSACTION;
+        ROLLBACK;
 
 						SELECT 
 								ERROR_NUMBER()		AS ErrorNumber,
