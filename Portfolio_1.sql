@@ -1,4 +1,7 @@
 --WINDOW FUNCTION
+
+
+
 --Ranking all records within each group of sales order IDs
 
 SELECT SalesOrderID,SalesOrderDetailID,LineTotal,
@@ -7,6 +10,9 @@ SELECT SalesOrderID,SalesOrderDetailID,LineTotal,
 FROM AdventureWorks2022.Sales.SalesOrderDetail
 ORDER BY 1
 
+
+
+	
 --Rank / Dense_Rank
 
 SELECT SalesOrderID,SalesOrderDetailID,LineTotal,
@@ -16,6 +22,7 @@ FROM AdventureWorks2022.Sales.SalesOrderDetail
 ORDER BY 1
 
 
+	
 --LEAD / LAG
 
 SELECT SalesOrderID,OrderDate,CustomerID,TotalDue,
@@ -35,6 +42,9 @@ FROM AdventureWorks2022.Sales.SalesOrderDetail
 WHERE RNK<=3
 ORDER BY 1
 
+
+
+	
 --Scalar Subqueries
 
 SELECT ProductID,[Name],StandardCost,ListPrice,
@@ -44,6 +54,9 @@ FROM AdventureWorks2022.Production.Product
 WHERE ListPrice>(SELECT AVG(ListPrice)FROM Production.Product)
 ORDER BY ListPrice
 
+
+
+	
 --Corrolated Subqueries
 
 SELECT SalesOrderID,OrderDate,SubTotal,TaxAmt,Freight,TotalDue,
@@ -57,6 +70,9 @@ MultiOrderCount=
 
 FROM Sales.SalesOrderHeader a
 
+
+
+	
 --EXISTS / NOT EXISTS
 
 SELECT a.SalesOrderID,a.OrderDate,a.TotalDue
@@ -69,6 +85,9 @@ WHERE EXISTS /*--NOT EXISTS*/(
 )
 ORDER BY 1
 
+
+
+	
 --Pivot
 
 SELECT *
@@ -89,8 +108,9 @@ SUM(LineTotal) FOR ProductCategoryName IN ([Accessories],[Bikes],[Clothing],[Com
 ORDER BY OrderQty
 
 
----CTE(Common Table Expression)
 
+	
+---CTE(Common Table Expression)
 
 --INSTEAD OF THIS ...
 
@@ -145,8 +165,9 @@ FROM Top10 a
 LEFT JOIN Top10 b ON a.OrderMonth=DATEADD(MONTH,1,b.OrderMonth)
 ORDER BY 1
 
+	
 
---Recursive CTEs
+--Recursive CTEs To Create A Calendar Table Then INSERT AND UPDATE IT 
 
 WITH DateSeires AS
 (
@@ -158,9 +179,30 @@ WITH DateSeires AS
 	FROM DateSeires
 	WHERE MyDate<CAST('12-31-2030' AS DATE)
 )
+INSERT INTO AdventureWorks2022..Calendar (DateValue)
 SELECT MyDate FROM DateSeires
 OPTION(MAXRECURSION 10000)
 
+UPDATE Calendar
+SET
+	DayOfWeekNumber = DATEPART(WEEKDAY,DateValue),
+	DayOfWeekName = FORMAT(DateValue,'dddd'),
+	DayOfMonthNumber=DAY(DateValue),
+	MonthNumber=MONTH(DateValue),
+	YearNumber=YEAR(DateValue),
+	WeekendFlag	=
+	CASE
+		WHEN DayOfWeekName IN ('Saturday','Sunday') THEN 1
+		ELSE 0
+	END,
+	HolidayFlag=
+	CASE
+		WHEN DayOfMonthNumber=1 AND MonthNumber=1 THEN 1
+		ELSE 0
+	END
+
+
+	
 --Temp Table
 
 SELECT OrderDate,TotalDue,
